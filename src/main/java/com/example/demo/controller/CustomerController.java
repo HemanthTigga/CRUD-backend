@@ -60,7 +60,7 @@ public class CustomerController {
         Customer customer = new Customer(id, name, age, email);
         return customerService.updateCustomer(customer);
     }
-
+ 
     @GetMapping("/deleteCustomer/{id}")
     @CrossOrigin(origins = "http://localhost:5173")
     public boolean deleteCustomer(@Valid @PathVariable int id) {
