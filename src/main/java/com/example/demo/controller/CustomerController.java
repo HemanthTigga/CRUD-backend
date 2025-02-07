@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Pattern;
 import org.hibernate.Internal;
 import org.hibernate.annotations.IdGeneratorType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -47,13 +48,23 @@ public class CustomerController {
 
     @GetMapping("/getCustomer")
     @CrossOrigin(origins = "http://localhost:5173")
-    public List<Customer> getCustomer(
+//    public List<Customer> getCustomer(
+//            @RequestParam(required = false) String search,
+//            @RequestParam(required = false) String sortBy,
+//            @RequestParam(required = false) String order,
+//            @RequestParam(required = false) Integer filterAge
+//    ) {
+//        return customerService.getCustomer(search, sortBy, order,filterAge);
+//    }
+    public Page<Customer> getCustomer(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String order,
-            @RequestParam(required = false) Integer filterAge
+            @RequestParam(required = false) Integer filterAge,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "3") int size
     ) {
-        return customerService.getCustomer(search, sortBy, order,filterAge);
+        return customerService.getCustomer(search, sortBy, order,filterAge,page,size);
     }
 
     @PostMapping("/updateCustomer")

@@ -4,6 +4,10 @@ import com.example.demo.entity.Customer;
 import com.example.demo.repository.CustomerRepo;
 import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -65,44 +69,61 @@ public class CustomerService {
 //    public List<Customer> getCustomer() {
 //        return customerRepo.findAll();
 //    }
-    public List<Customer> getCustomer(String search, String sortBy, String order, Integer filterAge) {
-        List<Customer> customers = customerRepo.findAll();
-//        Search functiionality
-        if (search != null && !search.isEmpty()) {
-            String searchLower = search.toLowerCase();
-            customers = customers.stream()
-                    .filter(c -> String.valueOf(c.getId()).contains(searchLower) || // Search by ID
-                            c.getName().toLowerCase().contains(searchLower) ||
-                            c.getEmail().toLowerCase().contains(searchLower))
-                    .collect(Collectors.toList());
-        }
-//        Filter functionality
-        System.out.println("Age ="+filterAge);
-        if (filterAge!=null) {
-            customers = customers.stream()
-                    .filter(c -> c.getAge() == filterAge)
-                    .collect(Collectors.toList());
-        }
-        
-//        Sorting functionality
-        System.out.println("SortBy: " + sortBy + ", Order: " + order);
+//    public List<Customer> getCustomer(String search, String sortBy, String order, Integer filterAge) {
+//        List<Customer> customers = customerRepo.findAll();
+////        Search functiionality
+//        if (search != null && !search.isEmpty()) {
+//            String searchLower = search.toLowerCase();
+//            customers = customers.stream()
+//                    .filter(c -> String.valueOf(c.getId()).contains(searchLower) || // Search by ID
+//                            c.getName().toLowerCase().contains(searchLower) ||
+//                            c.getEmail().toLowerCase().contains(searchLower))
+//                    .collect(Collectors.toList());
+//        }
+////        Filter functionality
+//        System.out.println("Age ="+filterAge);
+//        if (filterAge!=null) {
+//            customers = customers.stream()
+//                    .filter(c -> c.getAge() == filterAge)
+//                    .collect(Collectors.toList());
+//        }
+//        
+////        Sorting functionality
+//        System.out.println("SortBy: " + sortBy + ", Order: " + order);
+//
+//        if(sortBy != null){
+//            boolean ascending = order == null || order.equalsIgnoreCase("asc");
+//            customers.sort((c1,c2) -> {
+//                int comparison = 0;
+//                if(sortBy.equals("name")){
+//                    comparison = c1.getName().compareToIgnoreCase(c2.getName());
+//                }else if(sortBy.equals("id")){
+//                    comparison = Integer.compare(c1.getId(), c2.getId());
+//                }else if(sortBy.equals("age")){
+//                    comparison = Integer.compare(c1.getAge(), c2.getAge());
+//                }
+//                return ascending? comparison : -comparison;
+//            });
+//        }
+//        return customers;
+//    }
 
-        if(sortBy != null){
-            boolean ascending = order == null || order.equalsIgnoreCase("asc");
-            customers.sort((c1,c2) -> {
-                int comparison = 0;
-                if(sortBy.equals("name")){
-                    comparison = c1.getName().compareToIgnoreCase(c2.getName());
-                }else if(sortBy.equals("id")){
-                    comparison = Integer.compare(c1.getId(), c2.getId());
-                }else if(sortBy.equals("age")){
-                    comparison = Integer.compare(c1.getAge(), c2.getAge());
-                }
-                return ascending? comparison : -comparison;
-            });
+    public Page<Customer> getCustomer(String search, String sortBy, String order, Integer filterAge, int page, int size) {
+        Sort.Direction direction = order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort sort = Sort.by(direction, (sortBy != null && !sortBy.isEmpty()) ? sortBy : "id");
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        if (search != null && !search.isEmpty() && filterAge != null) {
+            return customerRepo.findByNameContainingIgnoreCaseAndAge(search, filterAge, pageable);
+        } else if (search != null && !search.isEmpty()) {
+            return customerRepo.findByNameContainingIgnoreCase(search, pageable);
+        } else if (filterAge != null) {
+            return customerRepo.findByAge(filterAge, pageable);
+        } else {
+            return customerRepo.findAll(pageable);
         }
-        return customers;
     }
+
     @Transactional
     public Customer getCustomerById(int id){
         return customerRepo.findById(id).orElse(null);
