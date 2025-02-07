@@ -7,6 +7,7 @@ import com.example.demo.service.CustomerService;
 import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.Pattern;
+import org.hibernate.Internal;
 import org.hibernate.annotations.IdGeneratorType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -46,8 +47,13 @@ public class CustomerController {
 
     @GetMapping("/getCustomer")
     @CrossOrigin(origins = "http://localhost:5173")
-    public List<Customer> getCustomer() {
-        return customerService.getCustomer();
+    public List<Customer> getCustomer(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String order,
+            @RequestParam(required = false) Integer filterAge
+    ) {
+        return customerService.getCustomer(search, sortBy, order,filterAge);
     }
 
     @PostMapping("/updateCustomer")

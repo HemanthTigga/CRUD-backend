@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomerService {
@@ -61,8 +62,46 @@ public class CustomerService {
 
     //    show Customer details
     @Transactional(readOnly = true)
-    public List<Customer> getCustomer() {
-        return customerRepo.findAll();
+//    public List<Customer> getCustomer() {
+//        return customerRepo.findAll();
+//    }
+    public List<Customer> getCustomer(String search, String sortBy, String order, Integer filterAge) {
+        List<Customer> customers = customerRepo.findAll();
+//        Search functiionality
+        if (search != null && !search.isEmpty()) {
+            String searchLower = search.toLowerCase();
+            customers = customers.stream()
+                    .filter(c -> String.valueOf(c.getId()).contains(searchLower) || // Search by ID
+                            c.getName().toLowerCase().contains(searchLower) ||
+                            c.getEmail().toLowerCase().contains(searchLower))
+                    .collect(Collectors.toList());
+        }
+//        Filter functionality
+        System.out.println("Age ="+filterAge);
+        if (filterAge!=null) {
+            customers = customers.stream()
+                    .filter(c -> c.getAge() == filterAge)
+                    .collect(Collectors.toList());
+        }
+        
+//        Sorting functionality
+        System.out.println("SortBy: " + sortBy + ", Order: " + order);
+
+        if(sortBy != null){
+            boolean ascending = order == null || order.equalsIgnoreCase("asc");
+            customers.sort((c1,c2) -> {
+                int comparison = 0;
+                if(sortBy.equals("name")){
+                    comparison = c1.getName().compareToIgnoreCase(c2.getName());
+                }else if(sortBy.equals("id")){
+                    comparison = Integer.compare(c1.getId(), c2.getId());
+                }else if(sortBy.equals("age")){
+                    comparison = Integer.compare(c1.getAge(), c2.getAge());
+                }
+                return ascending? comparison : -comparison;
+            });
+        }
+        return customers;
     }
     @Transactional
     public Customer getCustomerById(int id){
