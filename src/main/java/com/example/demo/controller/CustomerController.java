@@ -11,11 +11,14 @@ import org.hibernate.Internal;
 import org.hibernate.annotations.IdGeneratorType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class CustomerController {
@@ -56,15 +59,22 @@ public class CustomerController {
 //    ) {
 //        return customerService.getCustomer(search, sortBy, order,filterAge);
 //    }
-    public Page<Customer> getCustomer(
+    public ResponseEntity<Map<String, Object>> getCustomer(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String sortBy,
-            @RequestParam(required = false) String order,
+            @RequestParam(defaultValue = "asc") String order,
             @RequestParam(required = false) Integer filterAge,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "3") int size
     ) {
-        return customerService.getCustomer(search, sortBy, order,filterAge,page,size);
+        Page<Customer> customerPage = customerService.getCustomer(search, sortBy, order, filterAge, page, size);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("customers", customerPage.getContent());
+        response.put("currentPage", customerPage.getNumber() + 1);
+        response.put("totalPages", customerPage.getTotalPages());
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/updateCustomer")
