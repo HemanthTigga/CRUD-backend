@@ -4,6 +4,7 @@ import com.example.demo.dto.requests.CustomerRequest;
 import com.example.demo.entity.Customer;
 import com.example.demo.repository.CustomerRepo;
 import com.example.demo.service.CustomerService;
+import com.example.demo.service.ExportService;
 import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.Pattern;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,6 +30,8 @@ public class CustomerController {
     private CustomerService customerService;
     @Autowired
     private CustomerRepo customerRepo;
+    @Autowired
+    private ExportService exportService;
 
     @PostMapping("/addCustomer")
     @CrossOrigin(origins = "http://localhost:5173")
@@ -134,50 +138,49 @@ public class CustomerController {
     }
 
 
-
     @PostMapping("/updateCustomer")
     @CrossOrigin(origins = "http://localhost:5173")
-//    public Customer updateCustomer(@Valid @RequestBody CustomerRequest customerRequest) {
-//        int id = customerRequest.getId();
-//        String name = customerRequest.getName();
-//        int age = customerRequest.getAge();
-//        String email = customerRequest.getEmail();
-//        Customer customer = new Customer(id, name, age, email);
-//        return customerService.updateCustomer(customer);
+    public Customer updateCustomer(@Valid @RequestBody CustomerRequest customerRequest) {
+        int id = customerRequest.getId();
+        String name = customerRequest.getName();
+        int age = customerRequest.getAge();
+        String email = customerRequest.getEmail();
+        Customer customer = new Customer(id, name, age, email, null);
+        return customerService.updateCustomer(customer);
+    }
+
+//    public ResponseEntity<Customer> updateCustomer(
+//            @Valid @RequestPart("customer") CustomerRequest customerRequest,
+//            @RequestPart(value = "image", required = false) MultipartFile image) {
+//
+//        try {
+//            byte[] imageData = null;
+//            if (image != null && !image.isEmpty()) {
+//                imageData = image.getBytes();
+//            }
+//
+//            Customer customer = new Customer(
+//                    customerRequest.getId(),
+//                    customerRequest.getName(),
+//                    customerRequest.getAge(),
+//                    customerRequest.getEmail(),
+//                    imageData
+//            );
+//
+//            Customer updatedCustomer = customerService.updateCustomer(customer);
+//            return ResponseEntity.ok(updatedCustomer);
+//
+//        } catch (IOException e) {
+//            return ResponseEntity.internalServerError().build();
+//        }
 //    }
 
-    public ResponseEntity<Customer> updateCustomer(
-            @Valid @RequestPart("customer") CustomerRequest customerRequest,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
-
-        try {
-            byte[] imageData = null;
-            if (image != null && !image.isEmpty()) {
-                imageData = image.getBytes();
-            }
-
-            Customer customer = new Customer(
-                    customerRequest.getId(),
-                    customerRequest.getName(),
-                    customerRequest.getAge(),
-                    customerRequest.getEmail(),
-                    imageData
-            );
-
-            Customer updatedCustomer = customerService.updateCustomer(customer);
-            return ResponseEntity.ok(updatedCustomer);
-
-        } catch (IOException e) {
-            return ResponseEntity.internalServerError().build();
-        }
-    }
- 
     @GetMapping("/deleteCustomer/{id}")
     @CrossOrigin(origins = "http://localhost:5173")
     public ResponseEntity<Boolean> deleteCustomer(@Valid @PathVariable int id) {
         return ResponseEntity.ok(customerService.deleteCustomer(id));
     }
-    
+
     @GetMapping("/viewCustomer/{id}")
     @CrossOrigin(origins = "http://localhost:5173")
 //    public Customer viewCustomer(@PathVariable int id){
@@ -208,6 +211,16 @@ public class CustomerController {
             return ResponseEntity.notFound().build();
         }
     }
+    @GetMapping("/export/pdf")
+    @CrossOrigin(origins = "http://localhost:5173")
+    public ResponseEntity<byte[]> exportToPDF() throws IOException {
+        return exportService.exportToPDF();
+    }
 
+    @GetMapping("/export/excel")
+    @CrossOrigin(origins = "http://localhost:5173")
+    public ResponseEntity<byte[]> exportToExcel() {
+        return exportService.exportToExcel();
+    }
 
 }
