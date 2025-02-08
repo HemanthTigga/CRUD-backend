@@ -4,10 +4,7 @@ import com.example.demo.entity.Customer;
 import com.example.demo.repository.CustomerRepo;
 import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -17,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -109,20 +107,32 @@ public class CustomerService {
 //    }
 
     public Page<Customer> getCustomer(String search, String sortBy, String order, Integer filterAge, int page, int size) {
-        Sort.Direction direction = order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort.Direction direction = order != null && order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
         Sort sort = Sort.by(direction, (sortBy != null && !sortBy.isEmpty()) ? sortBy : "id");
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        if (search != null && !search.isEmpty() && filterAge != null) {
-            return customerRepo.findByNameContainingIgnoreCaseAndAge(search, filterAge, pageable);
-        } else if (search != null && !search.isEmpty()) {
-            return customerRepo.findByNameContainingIgnoreCase(search, pageable);
-        } else if (filterAge != null) {
-            return customerRepo.findByAge(filterAge, pageable);
-        } else {
-            return customerRepo.findAll(pageable);
+        // Search by ID, Name, or Email
+        if (search != null && !search.isEmpty()) {
+            try {
+                // If search is a number, attempt partial ID search
+                Integer.parseInt(search);
+                return (filterAge != null)
+                        ? customerRepo.findByIdContainingAndAge(search, filterAge, pageable)
+                        : customerRepo.findByIdContaining(search, pageable);
+            } catch (NumberFormatException ignored) {
+                // Not a number, proceed with name and email search
+                return (filterAge != null)
+                        ? customerRepo.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndAge(search, search, filterAge, pageable)
+                        : customerRepo.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCase(search, search, pageable);
+            }
         }
+
+        // Default case: return all customers with pagination
+        return (filterAge != null)
+                ? customerRepo.findByAge(filterAge, pageable)
+                : customerRepo.findAll(pageable);
     }
+
 
     @Transactional
     public Customer getCustomerById(int id){
