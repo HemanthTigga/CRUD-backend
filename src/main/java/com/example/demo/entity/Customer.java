@@ -22,15 +22,25 @@ public class Customer {
     private int id;          //always unique
     private String name;
     private int age;
-    private String email; 
-//    @Lob
-//    private byte[] image;
+    private String email;
+    @Lob
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] image;
 
-    public Customer(int id, String name, int age, String email) {
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
+    }
+
+    public Customer(int id, String name, int age, String email,byte[] image) {
         this.id = id;
         this.name = name;
         this.age = age;
         this.email = email;
+        this.image = image;
     }
     public Customer(){}
 

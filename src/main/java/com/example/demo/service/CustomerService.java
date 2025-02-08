@@ -14,9 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,74 +62,82 @@ public class CustomerService {
 
     //    show Customer details
     @Transactional(readOnly = true)
-//    public List<Customer> getCustomer() {
-//        return customerRepo.findAll();
-//    }
-//    public List<Customer> getCustomer(String search, String sortBy, String order, Integer filterAge) {
-//        List<Customer> customers = customerRepo.findAll();
-////        Search functiionality
-//        if (search != null && !search.isEmpty()) {
-//            String searchLower = search.toLowerCase();
-//            customers = customers.stream()
-//                    .filter(c -> String.valueOf(c.getId()).contains(searchLower) || // Search by ID
-//                            c.getName().toLowerCase().contains(searchLower) ||
-//                            c.getEmail().toLowerCase().contains(searchLower))
-//                    .collect(Collectors.toList());
-//        }
-////        Filter functionality
-//        System.out.println("Age ="+filterAge);
-//        if (filterAge!=null) {
-//            customers = customers.stream()
-//                    .filter(c -> c.getAge() == filterAge)
-//                    .collect(Collectors.toList());
-//        }
-//        
-////        Sorting functionality
-//        System.out.println("SortBy: " + sortBy + ", Order: " + order);
+//    
+
+//    public Page<Customer> getCustomer(String search, String sortBy, String order, Integer filterAge, int page, int size) {
+//        Sort.Direction direction = order != null && order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+//        Sort sort = Sort.by(direction, (sortBy != null && !sortBy.isEmpty()) ? sortBy : "id");
+//        Pageable pageable = PageRequest.of(page, size, sort);
 //
-//        if(sortBy != null){
-//            boolean ascending = order == null || order.equalsIgnoreCase("asc");
-//            customers.sort((c1,c2) -> {
-//                int comparison = 0;
-//                if(sortBy.equals("name")){
-//                    comparison = c1.getName().compareToIgnoreCase(c2.getName());
-//                }else if(sortBy.equals("id")){
-//                    comparison = Integer.compare(c1.getId(), c2.getId());
-//                }else if(sortBy.equals("age")){
-//                    comparison = Integer.compare(c1.getAge(), c2.getAge());
-//                }
-//                return ascending? comparison : -comparison;
-//            });
+//        // Search by ID, Name, or Email
+//        if (search != null && !search.isEmpty()) {
+//            try {
+//                // If search is a number, attempt partial ID search
+//                Integer.parseInt(search);
+//                return (filterAge != null)
+//                        ? customerRepo.findByIdContainingAndAge(search, filterAge, pageable)
+//                        : customerRepo.findByIdContaining(search, pageable);
+//            } catch (NumberFormatException ignored) {
+//                // Not a number, proceed with name and email search
+//                return (filterAge != null)
+//                        ? customerRepo.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndAge(search, search, filterAge, pageable)
+//                        : customerRepo.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCase(search, search, pageable);
+//            }
 //        }
-//        return customers;
+//
+//        // Default case: return all customers with pagination
+//        return (filterAge != null)
+//                ? customerRepo.findByAge(filterAge, pageable)
+//                : customerRepo.findAll(pageable);
 //    }
 
-    public Page<Customer> getCustomer(String search, String sortBy, String order, Integer filterAge, int page, int size) {
-        Sort.Direction direction = order != null && order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+    public Page<Map<String, Object>> getCustomer(String search, String sortBy, String order, Integer filterAge, int page, int size) {
+        Sort.Direction direction = (order != null && order.equalsIgnoreCase("desc")) ? Sort.Direction.DESC : Sort.Direction.ASC;
         Sort sort = Sort.by(direction, (sortBy != null && !sortBy.isEmpty()) ? sortBy : "id");
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        // Search by ID, Name, or Email
+        Page<Customer> customerPage;
+
+        // Search logic
         if (search != null && !search.isEmpty()) {
             try {
-                // If search is a number, attempt partial ID search
                 Integer.parseInt(search);
-                return (filterAge != null)
-                        ? customerRepo.findByIdContainingAndAge(search, filterAge, pageable)
-                        : customerRepo.findByIdContaining(search, pageable);
+                customerPage = (filterAge != null) ?
+                        customerRepo.findByIdContainingAndAge(search, filterAge, pageable) :
+                        customerRepo.findByIdContaining(search, pageable);
             } catch (NumberFormatException ignored) {
-                // Not a number, proceed with name and email search
-                return (filterAge != null)
-                        ? customerRepo.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndAge(search, search, filterAge, pageable)
-                        : customerRepo.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCase(search, search, pageable);
+                customerPage = (filterAge != null) ?
+                        customerRepo.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndAge(search, search, filterAge, pageable) :
+                        customerRepo.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCase(search, search, pageable);
             }
+        } else {
+            customerPage = (filterAge != null) ? customerRepo.findByAge(filterAge, pageable) : customerRepo.findAll(pageable);
         }
 
-        // Default case: return all customers with pagination
-        return (filterAge != null)
-                ? customerRepo.findByAge(filterAge, pageable)
-                : customerRepo.findAll(pageable);
+        // Convert response to include Base64 images
+        Page<Map<String, Object>> formattedPage = customerPage.map(customer -> {
+            Map<String, Object> customerMap = new HashMap<>();
+            customerMap.put("id", customer.getId());
+            customerMap.put("name", customer.getName());
+            customerMap.put("age", customer.getAge());
+            customerMap.put("email", customer.getEmail());
+
+            // Convert image bytes to Base64
+            if (customer.getImage() != null) {
+                String base64Image = Base64.getEncoder().encodeToString(customer.getImage());
+                customerMap.put("image", "data:image/jpeg;base64," + base64Image);
+            } else {
+                customerMap.put("image", null);
+            }
+
+            return customerMap;
+        });
+
+        return formattedPage;
     }
+
+
+
 
 
     @Transactional
