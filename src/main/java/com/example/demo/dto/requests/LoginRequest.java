@@ -12,8 +12,9 @@ import lombok.*;
 //@AllArgsConstructor
 //@RequiredArgsConstructor
 public class LoginRequest {
+    
 
-    @Id
+    
     @Email(regexp = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$",
             message = "Invalid Email Format")
     @NotBlank(message = "Email is required")
@@ -29,23 +30,39 @@ public class LoginRequest {
     }
     public LoginRequest(){}
 
-    public @Email(regexp = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$",
-            message = "Invalid Email Format") @NotBlank(message = "Email is required") String getUserId() {
+//    public @Email(regexp = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$",
+//            message = "Invalid Email Format") @NotBlank(message = "Email is required") String getUserId() {
+//        return userId;
+//    }
+//
+//    public void setUserId(@Email(regexp = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$",
+//            message = "Invalid Email Format") @NotBlank(message = "Email is required") String userId) {
+//        this.userId = userId;
+//    }
+//
+//    public @NotBlank(message = "Password is required") @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,20}$",
+//            message = "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character") String getPassword() {
+//        return password;
+//    }
+//
+//    public void setPassword(@NotBlank(message = "Password is required") @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,20}$",
+//            message = "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character") String password) {
+//        this.password = password;
+//    }
+
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(@Email(regexp = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$",
-            message = "Invalid Email Format") @NotBlank(message = "Email is required") String userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
-    public @NotBlank(message = "Password is required") @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,20}$",
-            message = "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character") String getPassword() {
+    public String getPassword() {
         return password;
     }
 
-    public void setPassword(@NotBlank(message = "Password is required") @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,20}$",
-            message = "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character") String password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 }

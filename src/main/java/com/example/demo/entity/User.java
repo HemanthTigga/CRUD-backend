@@ -7,6 +7,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+
 @Entity
 //@Getter
 //@Setter
@@ -16,59 +20,59 @@ import lombok.*;
 public class User {
 
     @Id
-    @Email(regexp = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$",
-            message = "Invalid Email Format")
     @NotBlank(message = "Email is required")
     private String email;
     @NotBlank(message = "Username is required")
     private String username;
     @NotBlank(message = "Password is required")
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,20}$",
-            message = "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character")
     private String password;
 //    private String role;
 
-    public User(String email, String username, String password, String role) {
+    public User(String email, String username, String password) {
         this.email = email;
         this.username = username;
         this.password = password;
-//        this.role = role;
     }
     public User(){}
 
-    public @Email(regexp = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$",
-            message = "Invalid Email Format") @NotBlank(message = "Email is required") String getEmail() {
+    public String getEmail() {
         return email;
     }
 
-    public void setEmail(@Email(regexp = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$",
-            message = "Invalid Email Format") @NotBlank(message = "Email is required") String email) {
+    public void setEmail(String email) {
         this.email = email;
     }
 
-    public @NotBlank(message = "Username is required") String getUsername() {
+    public String getUsername() {
         return username;
     }
 
-    public void setUsername(@NotBlank(message = "Username is required") String username) {
+    public void setUsername(String username) {
         this.username = username;
     }
 
-    public @NotBlank(message = "Password is required") @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,20}$",
-            message = "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character") String getPassword() {
+    public String getPassword() {
         return password;
     }
 
-    public void setPassword(@NotBlank(message = "Password is required") @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,20}$",
-            message = "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character") String password) {
+    public void setPassword(String password) {
         this.password = password;
     }
-
 //    public String getRole() {
 //        return role;
 //    }
 //
 //    public void setRole(String role) {
 //        this.role = role;
+//    }
+
+//    public static String hashValue(String value){
+//        try{
+//            MessageDigest md = MessageDigest.getInstance("SHA-256");
+//            byte[] hash = md.digest(value.getBytes());
+//            return Base64.getEncoder().encodeToString(hash);
+//        } catch(NoSuchAlgorithmException e){
+//            throw new RuntimeException("Error hashing data",e);
+//        }
 //    }
 }

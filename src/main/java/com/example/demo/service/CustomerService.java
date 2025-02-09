@@ -21,76 +21,23 @@ import java.util.stream.Collectors;
 public class CustomerService {
     @Autowired
     private CustomerRepo customerRepo;
-
-//    private static final String UPLOAD_DIR = "src/main/resources/static/images/";
-
     //    add Customer details
     @Transactional
-    public Customer addCustomer( Customer customer) {
+    public Customer addCustomer(Customer customer) {
         System.out.println("New customer details added");
 //        System.out.println(customer.getId());
 //        System.out.println(customer.getName());
 //        System.out.println(customer.getAge());
 //        System.out.println(customer.getEmail());
 //        System.out.println(customer.getImgURL());
-        if(customerRepo.existsById(customer.getId())){
+        if (customerRepo.existsById(customer.getId())) {
             throw new ValidationException("Customer already exists");
         }
         return customerRepo.save(customer);
     }
 
-//    public String saveImage(MultipartFile image) {
-//        try {
-//            Path uploadPath = Paths.get(UPLOAD_DIR);
-//            if (!Files.exists(uploadPath)) {
-//                Files.createDirectory(uploadPath);
-//                System.out.println("Directory created" + uploadPath.toAbsolutePath());
-//            } else {
-//                System.out.println("Directory already exists" + uploadPath.toAbsolutePath());
-//            }
-////            saving file
-//            String originalFile = StringUtils.cleanPath(image.getOriginalFilename());
-//            String fileName = System.currentTimeMillis() + "_" + originalFile;
-//            Path filePath = uploadPath.resolve(fileName);
-//            Files.copy(image.getInputStream(), filePath);
-//
-//            return "/images/" + fileName;
-//        } catch (IOException e) {
-//            throw new RuntimeException("Failed to save image", e);
-//        }
-//    }
-
     //    show Customer details
     @Transactional(readOnly = true)
-//    
-
-//    public Page<Customer> getCustomer(String search, String sortBy, String order, Integer filterAge, int page, int size) {
-//        Sort.Direction direction = order != null && order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
-//        Sort sort = Sort.by(direction, (sortBy != null && !sortBy.isEmpty()) ? sortBy : "id");
-//        Pageable pageable = PageRequest.of(page, size, sort);
-//
-//        // Search by ID, Name, or Email
-//        if (search != null && !search.isEmpty()) {
-//            try {
-//                // If search is a number, attempt partial ID search
-//                Integer.parseInt(search);
-//                return (filterAge != null)
-//                        ? customerRepo.findByIdContainingAndAge(search, filterAge, pageable)
-//                        : customerRepo.findByIdContaining(search, pageable);
-//            } catch (NumberFormatException ignored) {
-//                // Not a number, proceed with name and email search
-//                return (filterAge != null)
-//                        ? customerRepo.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCaseAndAge(search, search, filterAge, pageable)
-//                        : customerRepo.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCase(search, search, pageable);
-//            }
-//        }
-//
-//        // Default case: return all customers with pagination
-//        return (filterAge != null)
-//                ? customerRepo.findByAge(filterAge, pageable)
-//                : customerRepo.findAll(pageable);
-//    }
-
     public Page<Map<String, Object>> getCustomer(String search, String sortBy, String order, Integer filterAge, int page, int size) {
         Sort.Direction direction = (order != null && order.equalsIgnoreCase("desc")) ? Sort.Direction.DESC : Sort.Direction.ASC;
         Sort sort = Sort.by(direction, (sortBy != null && !sortBy.isEmpty()) ? sortBy : "id");
@@ -137,23 +84,20 @@ public class CustomerService {
     }
 
 
-
-
-
     @Transactional
-    public Customer getCustomerById(int id){
+    public Customer getCustomerById(int id) {
         return customerRepo.findById(id).orElse(null);
     }
 
     //    Update Customer details
     @Transactional
-    public Customer updateCustomer( Customer updatedcustomer) {
+    public Customer updateCustomer(Customer updatedcustomer) {
         Optional<Customer> ct = customerRepo.findById(updatedcustomer.getId());
-        if(ct.isPresent()) {
+        if (ct.isPresent()) {
 
 
             Customer oldcustomer = ct.get();
-            
+
 //        updating customer details
             oldcustomer.setAge(updatedcustomer.getAge());
             oldcustomer.setEmail(updatedcustomer.getEmail());
@@ -164,17 +108,17 @@ public class CustomerService {
         } else {
             throw new ValidationException("Customer not found.");
         }
-        
+
     }
 
 //    delete Customer details
 
     @Transactional
-    public boolean deleteCustomer( int id) {
-        if(id<=0){
+    public boolean deleteCustomer(int id) {
+        if (id <= 0) {
             throw new ValidationException("Customer ID must be greater than 0.");
         }
-        if(customerRepo.existsById(id)){
+        if (customerRepo.existsById(id)) {
             customerRepo.deleteById(id);
             System.out.println("Customer details deleted");
             return true;

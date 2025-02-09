@@ -35,16 +35,6 @@ public class CustomerController {
 
     @PostMapping("/addCustomer")
     @CrossOrigin(origins = "http://localhost:5173")
-//    public Customer addCustomer(@Valid @RequestBody CustomerRequest customerRequest) {
-//        
-//        int id = customerRequest.getId();
-//        String name = customerRequest.getName();
-//        int age = customerRequest.getAge();
-//        String email = customerRequest.getEmail();
-//        Customer customer = new Customer(id, name, age, email);
-//        return customerService.addCustomer(customer);
-//    }
-
     public ResponseEntity<Customer> addCustomer(
             @Valid @RequestPart("customer") CustomerRequest customerRequest,
             @RequestPart(value = "image", required = false) MultipartFile image) {
@@ -72,25 +62,6 @@ public class CustomerController {
 
     @GetMapping("/getCustomer")
     @CrossOrigin(origins = "http://localhost:5173")
-
-//    public ResponseEntity<Map<String, Object>> getCustomer(
-//            @RequestParam(required = false) String search,
-//            @RequestParam(required = false) String sortBy,
-//            @RequestParam(defaultValue = "asc") String order,
-//            @RequestParam(required = false) Integer filterAge,
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "3") int size
-//    ) {
-//        Page<Customer> customerPage = customerService.getCustomer(search, sortBy, order, filterAge, page, size);
-//
-//        Map<String, Object> response = new HashMap<>();
-//        response.put("customers", customerPage.getContent());
-//        response.put("currentPage", customerPage.getNumber() + 1);
-//        response.put("totalPages", customerPage.getTotalPages());
-//
-//        return ResponseEntity.ok(response);
-//    }
-
     public Page<Map<String, Object>> getCustomer(String search, String sortBy, String order, Integer filterAge, int page, int size) {
         Sort.Direction direction = (order != null && order.equalsIgnoreCase("desc")) ? Sort.Direction.DESC : Sort.Direction.ASC;
         Sort sort = Sort.by(direction, (sortBy != null && !sortBy.isEmpty()) ? sortBy : "id");
@@ -149,32 +120,6 @@ public class CustomerController {
         return customerService.updateCustomer(customer);
     }
 
-//    public ResponseEntity<Customer> updateCustomer(
-//            @Valid @RequestPart("customer") CustomerRequest customerRequest,
-//            @RequestPart(value = "image", required = false) MultipartFile image) {
-//
-//        try {
-//            byte[] imageData = null;
-//            if (image != null && !image.isEmpty()) {
-//                imageData = image.getBytes();
-//            }
-//
-//            Customer customer = new Customer(
-//                    customerRequest.getId(),
-//                    customerRequest.getName(),
-//                    customerRequest.getAge(),
-//                    customerRequest.getEmail(),
-//                    imageData
-//            );
-//
-//            Customer updatedCustomer = customerService.updateCustomer(customer);
-//            return ResponseEntity.ok(updatedCustomer);
-//
-//        } catch (IOException e) {
-//            return ResponseEntity.internalServerError().build();
-//        }
-//    }
-
     @GetMapping("/deleteCustomer/{id}")
     @CrossOrigin(origins = "http://localhost:5173")
     public ResponseEntity<Boolean> deleteCustomer(@Valid @PathVariable int id) {
@@ -183,9 +128,6 @@ public class CustomerController {
 
     @GetMapping("/viewCustomer/{id}")
     @CrossOrigin(origins = "http://localhost:5173")
-//    public Customer viewCustomer(@PathVariable int id){
-//        return customerService.getCustomerById(id);
-//    }
     public ResponseEntity<Map<String, Object>> viewCustomer(@PathVariable int id) {
         Optional<Customer> customerOpt = customerRepo.findById(id);
 
